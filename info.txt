@@ -1,0 +1,24 @@
+arm-none-eabi-objcopy -Obinary BB1.elf BB1.bin
+
+openocd -f /usr/local/share/openocd/scripts/board/st_nucleo_f4.cfg
+
+telnet localhost 4444
+reset halt
+flash write_image erase /home/ingemar/workspace2/BB1/Debug/BB1.hex
+
+
+GDB
+$ arm-none-eabi-gdb /home/ingemar/workspace2/BB1/Debug/BB1.elf
+(gdb) target remote localhost:3333
+Remote debugging using localhost:3333
+...
+(gdb) monitor reset halt
+...
+(gdb) load
+
+
+
+mon reset halt
+mon flash write_image erase /home/ingemar/workspace2/BB1/Debug/BB1.hex
+file /home/ingemar/workspace2/BB1/Debug/BB1.elf
+load
