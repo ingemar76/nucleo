@@ -2,10 +2,14 @@ CC = arm-none-eabi-gcc
 
 APP_NAME := lab
 
-OBJS += main.o stm32f4xx_hal.o stm32f4xx_hal_uart.o stm32f4xx_hal_tim.o stm32f4xx_hal_gpio.o
-OBJS += stm32f4xx_hal_rcc.o stm32f4xx_hal_cortex.o stm32f4xx_hal_dma.o stm32f4xx_hal_tim_ex.o
-OBJS += system_stm32f4xx.o syscalls.o
+OBJS += main.o
 
+OBJS += stm32f4xx_hal.o stm32f4xx_hal_uart.o stm32f4xx_hal_tim.o stm32f4xx_hal_gpio.o
+OBJS += stm32f4xx_hal_rcc.o stm32f4xx_hal_cortex.o stm32f4xx_hal_dma.o stm32f4xx_hal_tim_ex.o
+OBJS += system_stm32f4xx.o stm32f4xx_it.o stm32f4xx_hal_usart.o stm32f4xx_hal_msp.o
+OBJS += syscalls.o
+
+#Assembly start up file
 START := startup_stm32f411xe.S
 START_O := $(START:.S=.o)
 OBJS += $(START_O)
@@ -60,7 +64,10 @@ $(BUILD_DIR)/$(APP_NAME).hex: $(BUILD_DIR)/$(APP_NAME).elf
 
 -include $(patsubst %, $(BUILD_DIR)/%,$(OBJS:.o=.d))
 
-.PHONY: clean
+.PHONY: clean sizes
+
+sizes:
+	@arm-none-eabi-size --format=berkeley "$(BUILD_DIR)/$(APP_NAME).elf"
 
 clean:
 	@echo "Cleaning up ..."
