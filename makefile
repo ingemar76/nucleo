@@ -14,13 +14,15 @@ START := startup_stm32f411xe.S
 START_O := $(START:.S=.o)
 OBJS += $(START_O)
 
-LINK_FILE := linker/STM32F411RE_FLASH.ld
+SRC_BASE = ./src
 
-INCLUDE += -I. -Idrivers -Idrivers/cmsis -Iboard
+LINK_FILE := $(SRC_BASE)/linker/STM32F411RE_FLASH.ld
 
-VPATH = . drivers drivers/cmsis board
+INCLUDE += -I$(SRC_BASE)/ -I$(SRC_BASE)//drivers -I$(SRC_BASE)/drivers/cmsis -I$(SRC_BASE)/board
 
-BUILD_DIR = ../build
+VPATH = $(SRC_BASE)/ $(SRC_BASE)/drivers $(SRC_BASE)/drivers/cmsis $(SRC_BASE)/board
+
+BUILD_DIR = build
 #BUILD_DIR = .
 
 COMMON_FLAGS += -mcpu=cortex-m4 -mthumb -DSTM32F411xE
@@ -28,7 +30,7 @@ COMMON_FLAGS += -O0 -g3
 COMMON_FLAGS += -ffunction-sections -fdata-sections
 COMMON_FLAGS += -fmessage-length=0 -fsigned-char
 
-DEPFLAGS += -MMD -MP -MF"$(BUILD_DIR)/$*.d" -MT"$(BUILD_DIR)/$*.o"
+DEPFLAGS += -MMD -MP -MF"$(@:.o=.d)" -MT"$@"
 
 CFLAGS += $(COMMON_FLAGS) $(INCLUDE) $(DEPFLAGS) -std=gnu11
 
@@ -41,20 +43,18 @@ $(BUILD_DIR):
 #Ordinary compile
 $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 	@echo "Building $<"
-	@$(CC) -c  $(CFLAGS) $< -o $(BUILD_DIR)/$@
+	@$(CC) -c  $(CFLAGS) $< -o $@
 
-#Start up asm file
+#Startup asm file
 $(BUILD_DIR)/$(START_O): $(START)
 	@echo "Building asm $<"
-#	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -DSTM32F411xE -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -x assembler-with-cpp -MMD -MP -MF"startup_stm32f411xe.d" -MT"startup_stm32f411xe.o" -c -o "../build/startup_stm32f411xe.o" "startup_stm32f411xe.S"
-	@$(CC) -c $(COMMON_FLAGS) $(DEPFLAGS) -x assembler-with-cpp -o "$(BUILD_DIR)/$(START_O)" $<
+	@$(CC) -c $(COMMON_FLAGS) $(DEPFLAGS) -x assembler-with-cpp -o $@ $<
 
 
 #Linking app
 $(BUILD_DIR)/$(APP_NAME).elf: $(patsubst %, $(BUILD_DIR)/%,$(OBJS)) $(LINK_FILE)
 	@echo "Linking"
 	@$(CC) $(COMMON_FLAGS) -Xlinker --gc-sections -Wl,-Map,"$(BUILD_DIR)/$(APP_NAME).map" -T$(LINK_FILE) $(patsubst %, $(BUILD_DIR)/%,$(OBJS)) -o "$(BUILD_DIR)/$(APP_NAME).elf"
-#	$(CC) -mcpu=cortex-m4 -mthumb -DSTM32F411xE -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -Xlinker --gc-sections -Wl,-Map,"BB1.map" -Tlinker/STM32F411RE_FLASH.ld $(patsubst %, $(BUILD_DIR)/%,$(OBJS)) -o "main.elf"
 
 $(BUILD_DIR)/$(APP_NAME).hex: $(BUILD_DIR)/$(APP_NAME).elf
 	@echo "Generating hex file"
