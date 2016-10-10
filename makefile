@@ -1,4 +1,5 @@
 CC = arm-none-eabi-gcc
+gdb = arm-none-eabi-gdb
 
 APP_NAME := lab
 
@@ -64,7 +65,11 @@ $(BUILD_DIR)/$(APP_NAME).hex: $(BUILD_DIR)/$(APP_NAME).elf
 
 -include $(patsubst %, $(BUILD_DIR)/%,$(OBJS:.o=.d))
 
-.PHONY: clean sizes
+.PHONY: clean sizes install
+
+install: $(BUILD_DIR)/$(APP_NAME).hex
+	@cat gdb-init.template | sed  s,__ELF__,$(CURDIR)/$(BUILD_DIR)/$(APP_NAME).elf, > $(BUILD_DIR)/gdb-init.cmd
+	$(gdb) $(BUILD_DIR)/$(APP_NAME).elf --x=$(CURDIR)/$(BUILD_DIR)/gdb-init.cmd
 
 sizes:
 	@arm-none-eabi-size --format=berkeley "$(BUILD_DIR)/$(APP_NAME).elf"
