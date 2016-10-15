@@ -3,3 +3,7 @@ build
 .cproject
 .project
 .settings
+
+.gdb_history
+gdb-init.cmd
+gdb-init.template
