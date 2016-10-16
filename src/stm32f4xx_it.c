@@ -41,6 +41,8 @@
 #include "main.h"
 #include "stm32f4xx_it.h"
 
+extern TIM_HandleTypeDef    TimHandle;
+
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
   */
@@ -181,5 +183,9 @@ void SysTick_Handler(void)
 /**
   * @}
   */
+
+void TIM4_IRQHandler(void) {
+	HAL_TIM_IRQHandler(&TimHandle);
+}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

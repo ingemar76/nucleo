@@ -42,7 +42,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_nucleo.h"
-#include "stdio.h"
+#include "stm32f4xx_hal_tim.h"
+#include "stm32f4xx_hal_conf.h"
+#include <stdio.h>
+
+#define HAL_RCC_MODULE_ENABLED
+#define HAL_GPIO_MODULE_ENABLED
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/

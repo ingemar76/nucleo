@@ -38,15 +38,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "string.h"
-
-/** @addtogroup STM32F4xx_HAL_Examples
-  * @{
-  */
-
-/** @addtogroup GPIO_IOToggle
-  * @{
-  */ 
+#include <string.h>
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -56,7 +48,7 @@ static GPIO_InitTypeDef  GPIO_InitStruct;
 
 static UART_HandleTypeDef UartHandle;
 
-static TIM_HandleTypeDef TimHandle;
+static uint32_t it_cnt = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 #ifdef __GNUC__
@@ -67,10 +59,12 @@ static TIM_HandleTypeDef TimHandle;
   #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__ */
 
+/* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 
-int apa = 200;
+TIM_HandleTypeDef TimHandle;
+
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -103,7 +97,7 @@ int main(void)
   memset(&UartHandle, 0, sizeof(UART_HandleTypeDef));
   UartHandle.Instance          = USARTx;
 
-  UartHandle.Init.BaudRate     = 9600;
+  UartHandle.Init.BaudRate     = 921600;
   UartHandle.Init.WordLength   = UART_WORDLENGTH_8B;
   UartHandle.Init.StopBits     = UART_STOPBITS_1;
   UartHandle.Init.Parity       = UART_PARITY_NONE;
@@ -118,22 +112,18 @@ int main(void)
     Error_Handler();
   }
 
-  /* Output a message on Hyperterminal using printf function */
-//  printf("\n\r UART Printf Example: retarget the C library printf function to the UART\n\r");
-
   memset(&TimHandle, 0, sizeof(TIM_HandleTypeDef));
   /*##-1- Configure the TIM peripheral #######################################*/
    /* Set TIMx instance */
-   TimHandle.Instance = TIMx;
+  __HAL_RCC_TIM4_CLK_ENABLE();
 
-   /* Initialize TIMx peripheral as follows:
-        + Period = 0xFFFF
-        + Prescaler = 0
-        + ClockDivision = 0
-        + Counter direction = Up
-   */
-   TimHandle.Init.Period = 0xFFFF;
-   TimHandle.Init.Prescaler = 0;
+  HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(TIM4_IRQn);
+  TimHandle.Instance = TIM4;
+
+  //Give a tick every second, 100MHz, period = 50,000, prescaler = 2,000
+   TimHandle.Init.Period = 50000;
+   TimHandle.Init.Prescaler = 2000;
    TimHandle.Init.ClockDivision = 0;
    TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
    if(HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
@@ -142,9 +132,9 @@ int main(void)
      Error_Handler();
    }
 
-   if(HAL_TIM_Base_Start(&TimHandle) != HAL_OK)
+
+   if(HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)
    {
-     /* Initialization Error */
      Error_Handler();
    }
 
@@ -162,22 +152,17 @@ int main(void)
   int i = 0;
   while (1)
   {
-//    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
     
-    /* Insert a 100ms delay */
     i++;
     if (i % 10 == 0) {
-    	HAL_Delay(1000);
-    	printf("Hello\n");
+    	HAL_Delay(2000);
+    	printf("cnt: %d\n", it_cnt);
     }
     else {
-    	HAL_Delay(apa);
+    	HAL_Delay(200);
     }
   }
-}
-
-void TIM4_IRQHandler() {
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 }
 
 /**
@@ -185,10 +170,10 @@ void TIM4_IRQHandler() {
   * @param  htim: TIM IC handle
   * @retval None
   */
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-//	printf("Interrupt triggered\n");
+	it_cnt++;
 }
 
 
@@ -298,9 +283,5 @@ PUTCHAR_PROTOTYPE
 
   return ch;
 }
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
