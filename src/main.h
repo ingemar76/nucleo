@@ -45,9 +45,11 @@
 #include "stm32f4xx_hal_tim.h"
 #include "stm32f4xx_hal_conf.h"
 #include <stdio.h>
+#include <string.h>
 
 #define HAL_RCC_MODULE_ENABLED
 #define HAL_GPIO_MODULE_ENABLED
+#define HAL_I2C_MODULE_ENABLED
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/

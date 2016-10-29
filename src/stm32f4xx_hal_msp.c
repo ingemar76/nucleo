@@ -152,16 +152,25 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
   HAL_NVIC_EnableIRQ(TIMx_IRQn);
 }
 
-/**
-  * @}
-  */
+void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c) {
+  //Start port B clock
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  
+  //Start I2C block
+  __HAL_RCC_I2C1_CLK_ENABLE();
 
-/**
-  * @}
-  */
+  //I2C clock
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
+  GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-/**
-  * @}
-  */
+  //I2C data
+  GPIO_InitStruct.Pin = GPIO_PIN_7;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
