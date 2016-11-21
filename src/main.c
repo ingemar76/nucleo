@@ -169,7 +169,7 @@ int main(void) {
     if (i % 10 == 0) {
       HAL_Delay(2000);
       HT21D_STATUS res = ht21d_read_temp(&hi2c, &temp);
-      if (res == HT21D_OK) {
+      if (res == HT21D4_STATUS_OK) {
         printf("Temperature: %d.%02d\n", (int) temp, ((int) (temp * 100)) % 100);
       } else {
         printf("Temperature error: %d\n", res);

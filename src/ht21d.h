@@ -2,9 +2,9 @@
 #include "stm32f4xx_hal_conf.h"
 
 typedef enum {
-  HT21D_OK = 0,
-  HT21D_ERR_I2C,
-  HT21D_ERR_CRC
+  HT21D4_STATUS_OK = 0,
+  HT21D_STATUS_ERR_I2C,
+  HT21D_STATUS_ERR_CRC
 } HT21D_STATUS;
 
 #define HTU21D_ADDR                  0x40

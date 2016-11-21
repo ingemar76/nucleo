@@ -44,6 +44,7 @@
 #include "stm32f4xx_nucleo.h"
 #include "stm32f4xx_hal_tim.h"
 #include "stm32f4xx_hal_conf.h"
+#include "ht21d.h"
 #include <stdio.h>
 #include <string.h>
 

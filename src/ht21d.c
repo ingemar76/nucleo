@@ -42,23 +42,23 @@ HT21D_STATUS ht21d_read_temp(I2C_HandleTypeDef *hi2c, float *temperature) {
 
   if (HAL_I2C_Master_Transmit(hi2c, HTU21D_ADDR_WRITE, i2c_buf, 1, 2000)
       != HAL_OK) {
-    return HT21D_ERR_I2C;
+    return HT21D_STATUS_ERR_I2C;
   }
 
   HAL_Delay(55);
 
   if (HAL_I2C_Master_Receive(hi2c, HTU21D_ADDR_READ, i2c_buf, 3, 2000)
       != HAL_OK) {
-    return HT21D_ERR_I2C;
+    return HT21D_STATUS_ERR_I2C;
   }
 
   uint16_t raw = i2c_buf[0] << 8 | i2c_buf[1];
   float f = conv_temp(raw);
 
   if (!check_crc(raw, i2c_buf[2])) {
-    return HT21D_ERR_CRC;
+    return HT21D_STATUS_ERR_CRC;
   }
 
   *temperature = f;
-  return HT21D_OK;
+  return HT21D4_STATUS_OK;
 }
