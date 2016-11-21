@@ -161,7 +161,7 @@ int main(void) {
 
   /*##-3- Toggle PA05 IO in an infinite loop #################################*/
   int i;
-  float temp;
+  float temp, humid;
   while (1) {
     HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 
@@ -170,7 +170,12 @@ int main(void) {
       HAL_Delay(2000);
       HT21D_STATUS res = ht21d_read_temp(&hi2c, &temp);
       if (res == HT21D4_STATUS_OK) {
-        printf("Temperature: %d.%02d\n", (int) temp, ((int) (temp * 100)) % 100);
+        res = ht21d_read_humidity(&hi2c, &humid);
+        if (res == HT21D4_STATUS_OK) {
+          printf("Temperature/humidity: %d.%02d, %d.%02d\n", (int) temp, ((int) (temp * 100)) % 100, (int) humid, ((int) (humid * 100)) % 100);
+        } else {
+          printf("Humidity error: %d\n", res);
+        }
       } else {
         printf("Temperature error: %d\n", res);
       }

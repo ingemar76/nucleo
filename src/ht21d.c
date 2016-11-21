@@ -14,6 +14,17 @@ float conv_temp(uint16_t rawTemp) {
   return realTemperature;
 }
 
+float conv_humid(uint16_t rawHumidity) {
+    //sensorStatus = rawHumidity & 0x0003; //Grab only the right two bits
+    rawHumidity &= 0xFFFC; //Zero out the status bits but keep them in place
+    //Given the raw humidity data, calculate the actual relative humidity
+    float tempRH = rawHumidity / (float) 65536;
+    //2^16 = 65536float rh = -6 + (125 * tempRH);
+    float rh = -6 + (125 * tempRH); //From page 14
+    return rh;
+}
+
+
 uint8_t check_crc(uint16_t value, uint8_t crc) {
   uint32_t remainder = value; //Pad with 8 bits because we have to add in the check value
   remainder = remainder << 8;
@@ -36,9 +47,9 @@ uint8_t check_crc(uint16_t value, uint8_t crc) {
   }
 }
 
-HT21D_STATUS ht21d_read_temp(I2C_HandleTypeDef *hi2c, float *temperature) {
+HT21D_STATUS ht21d_read_data(I2C_HandleTypeDef *hi2c, uint8_t command, uint16_t *raw_data) {
   uint8_t i2c_buf[3];
-  i2c_buf[0] = TRIGGER_TEMP_MEASURE_NOHOLD;
+  i2c_buf[0] = command;
 
   if (HAL_I2C_Master_Transmit(hi2c, HTU21D_ADDR_WRITE, i2c_buf, 1, 2000)
       != HAL_OK) {
@@ -52,13 +63,41 @@ HT21D_STATUS ht21d_read_temp(I2C_HandleTypeDef *hi2c, float *temperature) {
     return HT21D_STATUS_ERR_I2C;
   }
 
-  uint16_t raw = i2c_buf[0] << 8 | i2c_buf[1];
-  float f = conv_temp(raw);
+  *raw_data = i2c_buf[0] << 8 | i2c_buf[1];
 
-  if (!check_crc(raw, i2c_buf[2])) {
+  if (!check_crc(*raw_data, i2c_buf[2])) {
     return HT21D_STATUS_ERR_CRC;
   }
 
-  *temperature = f;
   return HT21D4_STATUS_OK;
+}
+
+
+
+HT21D_STATUS ht21d_read_temp(I2C_HandleTypeDef *hi2c, float *temperature) {
+  uint16_t raw;
+
+  HT21D_STATUS res = ht21d_read_data(hi2c, TRIGGER_TEMP_MEASURE_NOHOLD,&raw);
+
+  if (res != HT21D4_STATUS_OK) {
+    return res;
+  }
+
+  *temperature = conv_temp(raw);
+
+  return res;
+}
+
+HT21D_STATUS ht21d_read_humidity(I2C_HandleTypeDef *hi2c, float *humidity) {
+  uint16_t raw;
+
+  HT21D_STATUS res = ht21d_read_data(hi2c, TRIGGER_HUMD_MEASURE_NOHOLD,&raw);
+
+  if (res != HT21D4_STATUS_OK) {
+    return res;
+  }
+
+  *humidity = conv_humid(raw);
+
+  return res;
 }

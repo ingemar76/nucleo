@@ -19,3 +19,5 @@ typedef enum {
 #define SOFT_RESET                   0xFE
 
 HT21D_STATUS ht21d_read_temp(I2C_HandleTypeDef *hi2c, float *temperature);
+
+HT21D_STATUS ht21d_read_humidity(I2C_HandleTypeDef *hi2c, float *humidity);
