@@ -38,6 +38,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "ingos.h"
+
+void my_messages(ingos_message* message);
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -110,8 +113,7 @@ int main(void) {
   memset(&TimHandle, 0, sizeof(TIM_HandleTypeDef));
   /*##-1- Configure the TIM peripheral #######################################*/
   /* Set TIMx instance */
-  __HAL_RCC_TIM4_CLK_ENABLE()
-  ;
+  __HAL_RCC_TIM4_CLK_ENABLE();
 
   HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM4_IRQn);
@@ -159,6 +161,14 @@ int main(void) {
   GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  init_ingos();
+
+  ingos_task_id ID;
+  add_ingo_task(&my_messages, &ID);
+  add_ingo_timer(ID, 500, 1, NULL);
+
+  start_ingos();
+
   /*##-3- Toggle PA05 IO in an infinite loop #################################*/
   int i;
   float temp, humid;
@@ -185,6 +195,9 @@ int main(void) {
   }
 }
 
+void my_messages(ingos_message* message) {
+  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+}
 /**
  * @brief  Input Capture callback in non blocking mode
  * @param  htim: TIM IC handle

@@ -9,7 +9,7 @@ OBJS += stm32f4xx_hal.o stm32f4xx_hal_uart.o stm32f4xx_hal_tim.o stm32f4xx_hal_g
 OBJS += stm32f4xx_hal_rcc.o stm32f4xx_hal_cortex.o stm32f4xx_hal_dma.o stm32f4xx_hal_tim_ex.o
 OBJS += system_stm32f4xx.o stm32f4xx_it.o stm32f4xx_hal_usart.o stm32f4xx_hal_msp.o
 OBJS += stm32f4xx_hal_i2c.o ht21d.o
-OBJS += syscalls.o
+OBJS += syscalls.o ingos.o
 
 #Assembly start up file
 START := startup_stm32f411xe.S
